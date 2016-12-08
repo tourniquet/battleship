@@ -2,7 +2,7 @@
 
 let menuState = {
   create () {
-    game.add.image(0, 0, 'background')
+    game.add.image(0, 0, 'menu-background')
 
     // display game name
     let gameName = game.add.text(
