@@ -5,65 +5,97 @@ let playState = {
     // set game background image
     this.levelBackground = game.add.sprite(0, 0, 'game-background')
 
-    this.cellWidth = 50
-    this.cellHeight = 50
-
-    this.template = this.get2dArray(10, 10, 0)
-    // console.log(this.template)
+    // cell square width and height
+    this.cellSide = 50
 
     this.cells = game.add.group()
+    this.cells.inputEnableChildren = true
+    this.cells.onChildInputDown.add(this.shoot, this)
 
-    for (let i = 0; i < this.template.length; i++) {
-      for (let j = 0; j < this.template.length; j++) {
-        let cell = this.cells.create(i * this.cellWidth, j * this.cellHeight, 'cell')
-        cell.inputEnabled = true
-        // cell.events.onInputDown.add(this.setX, this)
-      }
-    }
+    this.board = this.createCells()
+
+    this.checkBoard = Array(10).fill().map(() => Array(10).fill(0))
+
+    this.startButton = game.add.sprite(600, 450, 'start')
+    this.startButton.inputEnabled = true
+    this.startButton.events.onInputDown.add(this.startGame, this)
+
+    this.ships = game.add.group()
+    this.ships.inputEnableChildren = true
+    this.ships.onChildInputDown.add(this.rotateShip, this)
 
     // create ships
-    let oneCellShip = game.add.image(800, 50, 'one-cell-ship')
-    oneCellShip.inputEnabled = true
-    oneCellShip.input.enableDrag()
-    oneCellShip.input.enableSnap(50, 50, false, true)
-    oneCellShip.events.onInputDown.add(this.rotateShip, this)
+    this.oneCellShip = this.ships.create(800, 50, 'one-cell-ship')
+    this.oneCellShip.length = 1
+    this.oneCellShip.direction = 'vertical'
+    this.oneCellShip.input.enableDrag()
+    this.oneCellShip.input.enableSnap(50, 50, false, true)
 
-    let twoCellsShip = game.add.image(900, 150, 'two-cells-ship')
-    twoCellsShip.inputEnabled = true
-    twoCellsShip.input.enableDrag(true)
-    twoCellsShip.input.enableSnap(50, 50, false, true)
-    twoCellsShip.events.onInputDown.add(this.rotateShip, this)
-    // twoCellsShip.input.onTap.add(this.rotateShip, this)
+    this.twoCellsShip = this.ships.create(900, 150, 'two-cells-ship')
+    this.oneCellShip.length = 2
+    this.oneCellShip.direction = 'vertical'
+    this.twoCellsShip.input.enableDrag(true)
+    this.twoCellsShip.input.enableSnap(50, 50, false, true)
 
-    let threeCellsShip = game.add.image(1000, 250, 'three-cells-ship')
-    threeCellsShip.inputEnabled = true
-    threeCellsShip.input.enableDrag(true)
-    threeCellsShip.input.enableSnap(50, 50, false, true)
+    this.threeCellsShip = this.ships.create(1000, 250, 'three-cells-ship')
+    this.oneCellShip.length = 3
+    this.oneCellShip.direction = 'vertical'
+    this.threeCellsShip.input.enableDrag(true)
+    this.threeCellsShip.input.enableSnap(50, 50, false, true)
 
-    let fourCesllsShip = game.add.image(1100, 350, 'four-cells-ship')
-    fourCesllsShip.inputEnabled = true
-    fourCesllsShip.input.enableDrag(true)
-    fourCesllsShip.input.enableSnap(50, 50, false, true)
+    this.fourCesllsShip = this.ships.create(1100, 350, 'four-cells-ship')
+    this.oneCellShip.length = 4
+    this.oneCellShip.direction = 'vertical'
+    this.fourCesllsShip.input.enableDrag(true)
+    this.fourCesllsShip.input.enableSnap(50, 50, false, true)
 
-    // handle double click
-    // game.input.onTap.add(this.rotateShip, this)
+    // console.log(this.ships)
+    // console.log(this.cells)
   },
 
   update () {},
 
-  // where 'el' is default element which will be filled in every array
-  get2dArray (rows, columns, el) {
-    return Array(rows).fill().map(() => Array(columns).fill(el))
+  createCells () {
+    let cells = Array(10).fill().map(() => Array(10).fill(0))
+    // for (let i = 0; i < 10; i++) {
+    //   for (let j = 0; j < 10; j++) {
+    //     cells[i][j] = this.cells.create(i * this.cellSide, j * this.cellSide, 'cell')
+    //   }
+    // }
+    return cells
   },
 
-  setShip () {
-  },
+  setShip () {},
 
   rotateShip (ship, pointer) {
+    // handle double click
     if (pointer.msSinceLastClick < game.input.doubleTapRate) {
       console.log('Double clicked sprite')
+      ship.angle += 90
     }
-    // ship.angle += 90
+  },
+
+  startGame () {
+    // http://phaser.io/docs/2.6.2/Phaser.Group.html#ignoreChildInput
+    this.ships.ignoreChildInput = true
+
+    let ships = this.ships.children
+    let shipsLength = this.ships.children.length
+    for (let i = 0; i < shipsLength; i++) {
+      let cellIndexX = Math.floor(ships[i].x / this.cellSide)
+      let cellIndexY = Math.floor(ships[i].y / this.cellSide)
+      this.board[cellIndexX][cellIndexY] = 'x'
+    }
+  },
+
+  shoot () {
+    // Figure out what position on the grid that translates to
+    let cellIndexX = Math.floor(game.input.x / this.cellSide)
+    let cellIndexY = Math.floor(game.input.y / this.cellSide)
+
+    // if (this.oneCellShip.input.pointerOver()) {
+    //   this.checkBoard[cellIndexX][cellIndexY] = 'x'
+    // }
   },
 
   // check who win
